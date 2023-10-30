@@ -17,6 +17,5 @@ def after_request(response):
 
 @app.route("/")
 def index():
-    """Show portfolio of stocks"""
     if request.method == "GET":
         return render_template("index.html")

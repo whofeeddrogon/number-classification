@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Number Classification</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #007BFF;
+        }
+
+        #drawing-board {
+            block-size: auto;
+            border: 2px solid #000;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        #prediction {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Number classfication with machine learning</h1>
+    <p>Please draw a single number and send it to the machine learning algorithm.</p>
+
+    <canvas id="drawing-board"></canvas>
+
+    <div class="button-container">
+        <button id="classify-button">Send</button>
+        <button id="clear-button">Clean the board</button>
+    </div>
+
+    <p id="prediction">My guess is: ?</p>
+
+    <script>
+        const canvas = document.getElementById('drawing-board');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function getPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            return { x, y };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            drawing = true;
+            const position = getPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(position.x, position.y);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            ctx.closePath();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            const position = getPosition(e);
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+            ctx.lineTo(position.x, position.y);
+            ctx.stroke();
+        });
+
+        document.getElementById('classify-button').addEventListener('click', classifyDigit);
+        document.getElementById('clear-button').addEventListener('click', clearCanvas);
+
+        function classifyDigit() {
+            // Bu kısmı Flask veya başka bir sunucu tarafı kodu ile doldurmanız gerekecektir.
+            // Burada seçilen veriyi sunucuya gönderip sonucu alacaksınız.
+            // Sonucu bu koda eklemelisiniz.
+            const prediction = "My guess is: 5"; // Örnek bir tahmin
+            document.getElementById('prediction').textContent = prediction;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('prediction').textContent = "My guess is: ?";
+        }
+    </script>
+</body>
+</html>
