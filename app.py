@@ -8,10 +8,8 @@ import base64
 app = Flask(__name__)
 
 # Load the ONNX model
-onnx_model_path = '/home/berkay/Desktop/mnist-12.onnx'
+onnx_model_path = 'data/mnist-12.onnx'
 sess = onnxruntime.InferenceSession(onnx_model_path)
-
-from PIL import Image
 
 def preprocess_image(image):
     # Check for transparency
@@ -26,23 +24,19 @@ def preprocess_image(image):
     image = image.convert('L')
 
     # Resize the image to match the model's expected sizing
-    image = image.resize((28, 28), Image.LANCZOS)
+    image = image.resize((28, 28))
 
     # Save the grayscale image for inspection
     image.save("/home/berkay/Desktop/grayscale_image.png")
 
     # Convert the image to a numpy array
     image_array = np.array(image)
-    print(image_array)
     # Normalize the image
-    image_array = image_array.astype(np.float32) / 255.0
-
+    image_array = 1 - (image_array.astype(np.float32) / 255.0)
+    print(image_array)
     # Reshape the image to (1, 1, 28, 28)
     reshaped_image_array = image_array.reshape((1, 1, 28, 28))
-
     return reshaped_image_array
-
-
 
 @app.route('/')
 def index():
