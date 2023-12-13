@@ -1,7 +1,5 @@
-# NUMBER CLASSIFICATION
-#### Video Demo:  <URL HERE>
-#### Description:
 # Number Classification Web Application
+#### Video Demo:  <URL HERE>
 
 ## Overview
 
