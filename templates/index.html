@@ -13,7 +13,8 @@
         }
 
         #drawing-board {
-            block-size: auto;
+            width: 280px;  /* 10 times the model input size for better drawing */
+            height: 280px;
             border: 2px solid #000;
             display: block;
             margin: 0 auto;
@@ -43,7 +44,7 @@
     </style>
 </head>
 <body>
-    <h1>Number classfication with machine learning.</h1>
+    <h1>Number classification with machine learning.</h1>
     <p>Please draw a single number and send it to the machine learning algorithm.</p>
 
     <canvas id="drawing-board"></canvas>
@@ -58,14 +59,17 @@
     <script>
         const canvas = document.getElementById('drawing-board');
         const ctx = canvas.getContext('2d');
+        canvas.width = 280;
+        canvas.height = 280;
         let drawing = false;
 
         function getPosition(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = e.clientX - rect.left + window.scrollX;
+            const y = e.clientY - rect.top + window.scrollY;
             return { x, y };
         }
+
 
         canvas.addEventListener('mousedown', (e) => {
             drawing = true;
@@ -82,7 +86,7 @@
         canvas.addEventListener('mousemove', (e) => {
             if (!drawing) return;
             const position = getPosition(e);
-            ctx.lineWidth = 10;
+            ctx.lineWidth = 5;
             ctx.lineCap = 'round';
             ctx.strokeStyle = 'black';
             ctx.lineTo(position.x, position.y);
@@ -93,11 +97,28 @@
         document.getElementById('clear-button').addEventListener('click', clearCanvas);
 
         function classifyDigit() {
-            // Bu kısmı Flask veya başka bir sunucu tarafı kodu ile doldurmanız gerekecektir.
-            // Burada seçilen veriyi sunucuya gönderip sonucu alacaksınız.
-            // Sonucu bu koda eklemelisiniz.
-            const prediction = "My guess is: 5"; // Örnek bir tahmin
-            document.getElementById('prediction').textContent = prediction;
+            const canvasData = canvas.toDataURL('image/png');
+            const paddedCanvasData = canvasData.replace('data:image/png;base64,', '');
+            console.log(canvasData);
+            console.log(paddedCanvasData);
+
+            // Create an object with the image data
+            const data = {
+                data: paddedCanvasData,
+            };
+
+            fetch('/classify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prediction').textContent = `My guess is: ${data.prediction}`;
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         function clearCanvas() {
