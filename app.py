@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import io
 import onnxruntime
 import base64
@@ -11,28 +11,37 @@ app = Flask(__name__)
 onnx_model_path = '/home/berkay/Desktop/mnist-12.onnx'
 sess = onnxruntime.InferenceSession(onnx_model_path)
 
+from PIL import Image
+
 def preprocess_image(image):
-    # Debug: Save the original image for inspection
-    image.save("/home/berkay/Desktop/original_image.png")
+    # Check for transparency
+    if image.mode == 'RGBA':
+        # Create a white background image
+        white_bg = Image.new('RGBA', image.size, (255, 255, 255, 255))
+        # Paste the image onto the white background using the alpha channel as mask
+        white_bg.paste(image, mask=image.split()[3])
+        image = white_bg.convert('RGB')
+
+    # Convert to grayscale
     image = image.convert('L')
-    image.save("/home/berkay/Desktop/grayscale_image.png")
 
     # Resize the image to match the model's expected sizing
-    image = image.resize((28, 28))
+    image = image.resize((28, 28), Image.LANCZOS)
+
+    # Save the grayscale image for inspection
+    image.save("/home/berkay/Desktop/grayscale_image.png")
 
     # Convert the image to a numpy array
-    image_array = np.asarray(image)
-
-    # Debug: Print the image array to inspect
-    print("Image array:", image_array)
-
+    image_array = np.array(image)
+    print(image_array)
     # Normalize the image
-    normalized_image_array = (image_array.astype(np.float32) / 255.0)
+    image_array = image_array.astype(np.float32) / 255.0
 
     # Reshape the image to (1, 1, 28, 28)
-    reshaped_image_array = normalized_image_array.reshape((1, 1, 28, 28))
+    reshaped_image_array = image_array.reshape((1, 1, 28, 28))
 
     return reshaped_image_array
+
 
 
 @app.route('/')
@@ -48,11 +57,8 @@ def classify():
         # Decode the base64-encoded data part
         img_data_bytes = base64.b64decode(img_data_base64)
 
-        # Convert the bytes to a BytesIO object
-        img_data_io = io.BytesIO(img_data_bytes)
-
-        # Convert the BytesIO object to a PIL Image
-        image = Image.open(img_data_io)
+        # Convert the bytes to a PIL Image object directly
+        image = Image.open(io.BytesIO(img_data_bytes))
 
         # Preprocess the image
         preprocessed_image = preprocess_image(image)
