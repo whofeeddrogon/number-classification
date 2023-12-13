@@ -26,9 +26,6 @@ def preprocess_image(image):
     # Resize the image to match the model's expected sizing
     image = image.resize((28, 28))
 
-    # Save the grayscale image for inspection
-    image.save("/home/berkay/Desktop/grayscale_image.png")
-
     # Convert the image to a numpy array
     image_array = np.array(image)
     # Normalize the image
