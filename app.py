@@ -33,7 +33,6 @@ def preprocess_image(image):
     image_array = np.array(image)
     # Normalize the image
     image_array = 1 - (image_array.astype(np.float32) / 255.0)
-    print(image_array)
     # Reshape the image to (1, 1, 28, 28)
     reshaped_image_array = image_array.reshape((1, 1, 28, 28))
     return reshaped_image_array
